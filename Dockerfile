@@ -8,15 +8,15 @@ RUN pip3 wheel bitsandbytes
 FROM pytorch/pytorch:1.12.1-cuda11.3-cudnn8-devel
 WORKDIR /
 ADD https://api.github.com/repos/ShivamShrirao/diffusers/git/refs/heads/main /version.json
-RUN --mount=type=bind,target=whls,from=builder apt-get update && apt-get install -y git git-lfs unzip nano wget && \
-    git clone https://github.com/ShivamShrirao/diffusers && \
+RUN --mount=type=bind,target=whls,from=builder apt-get update && apt-get install -y git git-lfs unzip nano wget
+#install precompiled xformers for your GPU or compile from source https://github.com/facebookresearch/xformers/issues/473#issuecomment-1272576184
+RUN git clone https://github.com/ShivamShrirao/diffusers && \
     cd diffusers/examples/dreambooth/ && \
     pip install --no-cache-dir /diffusers triton==2.0.0.dev20220701 /whls/bitsandbytes*.whl && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install https://raw.githubusercontent.com/TheLastBen/fast-stable-diffusion/main/precompiled/V100/xformers-0.0.13.dev0-py3-none-any.whl && \
     cp train_dreambooth.py /train/ && \
     rm -rf /var/lib/apt/lists/*
-COPY start_training.sh /start_training.sh
 # Fix waifu diffusion training.
 RUN pip install scipy
 WORKDIR /train
